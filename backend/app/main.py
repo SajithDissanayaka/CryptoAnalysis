@@ -5,6 +5,7 @@ from app.api.routes.auth import router as auth_router
 from app.api.routes.health import router as health_router
 from app.db.database import engine
 from app.db.models import Base
+from app.api.routes import analysis
 
 
 Base.metadata.create_all(bind=engine)
@@ -24,3 +25,4 @@ app.add_middleware(
 
 app.include_router(health_router)
 app.include_router(auth_router)
+app.include_router(analysis.router)

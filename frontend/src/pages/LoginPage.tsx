@@ -2,11 +2,13 @@ import { useState, type FormEvent } from "react"
 import { getCurrentUser, login } from "../api/auth"
 import { saveAccessToken } from "../utils/token"
 import { useAuth } from "../hooks/useAuth"
+import { useNavigate } from 'react-router'
 
 
 function LoginPage() {
 
     const {setUser} = useAuth()
+    const navigate = useNavigate()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
@@ -22,31 +24,29 @@ function LoginPage() {
         setLoading(true)
 
         try {
-    const result = await login({
-        email,
-        password,
-    })
+            const result = await login({
+                email,
+                password,
+            })
 
-    saveAccessToken(result.access_token)
+            saveAccessToken(result.access_token)
 
-    const currentUser = await getCurrentUser()
+            const currentUser = await getCurrentUser()
 
-    setUser(currentUser)
+            setUser(currentUser)
+            navigate('/dashboard',{replace:true})
 
-    console.log(
-        'Current user:',
-        currentUser
-    )
+            console.log('Current user:',currentUser)
 
-} catch (error) {
-    console.error(error)
+        } catch (error) {
+            console.error(error)
 
-    setError('Invalid email or password')
+            setError('Invalid email or password')
 
-} finally {
-    setLoading(false)
-}
-    }
+        } finally {
+            setLoading(false)
+        }
+            }
 
 
     return (

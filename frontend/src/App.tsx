@@ -1,27 +1,36 @@
-import { useAuth } from './hooks/useAuth'
+import { Navigate, Route, Routes } from 'react-router'
 
-import DashboardPage from './pages/DashboardPage'
+import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
+import DashboardPage from './pages/DashboardPage'
 
 
 function App() {
-  const {
-    isAuthenticated,
-    loading,
-  } = useAuth()
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={<Navigate to="/dashboard" replace />}
+      />
 
+      <Route
+        path="/login"
+        element={<LoginPage />}
+      />
 
-  if (loading) {
-    return <p>Loading...</p>
-  }
+      <Route element={<ProtectedRoute />}>
+        <Route
+          path="/dashboard"
+          element={<DashboardPage />}
+        />
+      </Route>
 
-
-  if (isAuthenticated) {
-    return <DashboardPage />
-  }
-
-
-  return <LoginPage />
+      <Route
+        path="*"
+        element={<p>404 - Page not found</p>}
+      />
+    </Routes>
+  )
 }
 
 
