@@ -1,4 +1,6 @@
 import time
+import logging
+from httpx import HTTPError
 
 from ollama import RequestError, ResponseError
 from pydantic import ValidationError
@@ -22,15 +24,15 @@ def generate_reliable_analysis(
     for attempt in range(1, max_attempts + 1):
 
         try:
-            print(f"LLM attempt {attempt}/{max_attempts}")
+            logging.getLogger(__name__).debug("LLM attempt %s/%s", attempt, max_attempts)
 
             analysis = generate_crypto_analysis(symbol)
 
             return analysis
 
-        except (ValidationError, RequestError, TimeoutError) as error:
+        except (ValidationError, ValueError, RequestError, TimeoutError, ConnectionError, HTTPError) as error:
 
-            print(f"Attempt failed: {type(error).__name__}")
+            logging.getLogger(__name__).warning("LLM attempt failed: %s", type(error).__name__)
 
             if attempt == max_attempts:
                 break

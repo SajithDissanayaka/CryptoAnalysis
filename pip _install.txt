@@ -1,0 +1,3 @@
+python -m pip install -U langgraph langchain-core langchain-ollama  - 1
+ollama pull nomic-embed-text - 2
+python -m pip install pypdf python-multipart - 3

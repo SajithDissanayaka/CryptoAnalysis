@@ -1,5 +1,6 @@
 .env
 .env.*
+!.env.example
 
 # Python
 __pycache__/
@@ -27,6 +28,8 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+test-results/
+playwright-report/
 
 # Local databases
 *.db

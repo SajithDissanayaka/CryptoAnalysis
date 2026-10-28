@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 from pwdlib import PasswordHash
+from pwdlib.exceptions import UnknownHashError
 
 from app.core.config import settings
 
@@ -17,10 +18,10 @@ def verify_password(
     password: str,
     hashed_password: str
 ) -> bool:
-    return password_hash.verify(
-        password,
-        hashed_password
-    )
+    try:
+        return password_hash.verify(password, hashed_password)
+    except (ValueError, TypeError, UnknownHashError):
+        return False
 
 
 def create_access_token(
@@ -35,7 +36,8 @@ def create_access_token(
     payload = {
         "sub": str(user_id),
         "email": email,
-        "exp": expire
+        "exp": expire,
+        "iat": datetime.now(timezone.utc),
     }
 
     token = jwt.encode(
@@ -51,7 +53,8 @@ def decode_access_token(token: str) -> dict:
     payload = jwt.decode(
         token,
         settings.JWT_SECRET_KEY,
-        algorithms=[settings.JWT_ALGORITHM]
+        algorithms=[settings.JWT_ALGORITHM],
+        options={"require": ["exp", "sub"]},
     )
 
     return payload

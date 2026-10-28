@@ -1,0 +1,10 @@
+
+Bitcoin is a decentralized cryptocurrency that uses a proof-of-work consensus mechanism.
+
+Bitcoin miners compete to find a valid block hash according to the network's difficulty target. A valid block can be proposed to the network and verified by other nodes.
+
+Relative Strength Index (RSI) is a momentum indicator based on recent price gains and losses. RSI values above 70 are commonly described as overbought, but that does not guarantee a price reversal.
+
+MACD is a trend-following momentum indicator calculated using exponential moving averages. Its main components are the MACD line, signal line and histogram.
+
+Technical indicators should be interpreted with market context and should not be treated as guaranteed trading signals.

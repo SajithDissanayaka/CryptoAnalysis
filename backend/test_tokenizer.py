@@ -1,21 +1,28 @@
-import tiktoken
+"""Manual integration example; run this file directly to execute it."""
 
 
-encoding = tiktoken.get_encoding("cl100k_base")
+def main():
+    import tiktoken
 
-text = "CryptoMindAIAnalyzer predicts BTC volatility."
 
-token_ids = encoding.encode(text)
+    encoding = tiktoken.get_encoding("cl100k_base")
 
-print("Original text:", text)
+    text = "CryptoMindAIAnalyzer predicts BTC volatility."
 
-print("Token IDs:", token_ids)
+    token_ids = encoding.encode(text)
 
-print("Token count:", len(token_ids))
+    print("Original text:", text)
 
-print("\nIndividual tokens:")
+    print("Token IDs:", token_ids)
 
-for token_id in token_ids:
-    token_bytes = encoding.decode_single_token_bytes(token_id)
+    print("Token count:", len(token_ids))
 
-    print(token_id, "->", repr(token_bytes))
+    print("\nIndividual tokens:")
+
+    for token_id in token_ids:
+        token_bytes = encoding.decode_single_token_bytes(token_id)
+
+        print(token_id, "->", repr(token_bytes))
+
+if __name__ == "__main__":
+    main()

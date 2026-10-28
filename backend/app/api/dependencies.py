@@ -1,64 +1,42 @@
 from collections.abc import Generator
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jwt import InvalidTokenError
 from sqlalchemy.orm import Session
 
 from app.core.security import decode_access_token
 from app.db.database import SessionLocal
 from app.db.models import User
 
-
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 
 def get_db() -> Generator[Session, None, None]:
-    db = SessionLocal()
-
-    try:
+    with SessionLocal() as db:
         yield db
-    finally:
-        db.close()
 
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+    db: Session = Depends(get_db),
 ) -> User:
-
-    token = credentials.credentials
-
+    unauthorized = HTTPException(
+        status_code=401, detail="Invalid or expired token. Please sign in again.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    if credentials is None:
+        raise unauthorized
     try:
-        payload = decode_access_token(token)
-
-        user_id = payload.get("sub")
-
-        if user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication token"
-            )
-
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token"
-        )
-
-    user = db.query(User).filter(
-        User.id == int(user_id)
-    ).first()
-
+        payload = decode_access_token(credentials.credentials)
+        user_id = int(payload["sub"])
+        if user_id < 1:
+            raise ValueError("Invalid subject")
+    except (InvalidTokenError, KeyError, TypeError, ValueError):
+        raise unauthorized from None
+    user = db.get(User, user_id)
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found"
-        )
-
+        raise unauthorized
     if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is inactive"
-        )
-
+        raise HTTPException(status_code=403, detail="User account is inactive.")
     return user

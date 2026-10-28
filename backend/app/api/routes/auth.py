@@ -1,5 +1,7 @@
 from fastapi import APIRouter,Depends, HTTPException,status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy import func
 
 from app.api.dependencies import get_current_user, get_db
 from app.core.security import create_access_token, hash_password, verify_password
@@ -26,7 +28,7 @@ def register(
     existing_user = (
         db.query(User)
         .filter(
-            (User.email == data.email) 
+            (func.lower(User.email) == data.email)
             | (User.username == data.username)
         )
         .first()
@@ -44,7 +46,11 @@ def register(
     )
 
     db.add(user)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Email or username already exists") from None
     db.refresh(user)
 
     return user
@@ -62,7 +68,7 @@ def login(
     db: Session = Depends(get_db)
 ):
     user = (
-        db.query(User).filter(User.email == data.email).first()
+        db.query(User).filter(func.lower(User.email) == data.email).first()
     )
 
     if not user:
@@ -76,6 +82,9 @@ def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
+
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="User account is inactive.")
 
     access_token = create_access_token(
     user_id=user.id,

@@ -1,8 +1,16 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Literal
 
 class AnalysisRequest(BaseModel):
     symbol : str = Field(min_length=2, max_length=15)
+
+    @field_validator("symbol")
+    @classmethod
+    def validate_symbol(cls, value: str) -> str:
+        value = value.strip().upper()
+        if value not in {"BTC", "ETH", "SOL"}:
+            raise ValueError("Supported symbols are BTC, ETH and SOL.")
+        return value
 
 class AnalysisResponse(BaseModel):
     symbol : str

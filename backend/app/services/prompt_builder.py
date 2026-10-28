@@ -1,6 +1,11 @@
 import json
 
 
+def build_analysis_prompt(symbol: str, price: float | None, rsi: float | None, macd_signal: str | None) -> str:
+    """Plain-text equivalent used by local prompt inspection scripts."""
+    return "\n\n".join(message["content"] for message in build_analysis_messages(symbol, price, rsi, macd_signal))
+
+
 SYSTEM_PROMPT = """
 You are CryptoMind AI, a cryptocurrency market analysis assistant.
 

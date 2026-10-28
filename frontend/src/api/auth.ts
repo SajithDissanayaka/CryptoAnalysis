@@ -1,55 +1,18 @@
-import type { User } from "../types/auth"
-import {getAccessToken} from "../utils/token"
+import type { User } from '../types/auth'
+import { request } from './client'
 
 export interface LoginRequest {
-    email : string
-    passowrd : string
+  email: string
+  password: string
+}
+export interface LoginResponse {
+  message: string
+  access_token: string
+  token_type: string
 }
 
-export interface LoginResponse{
-    message : string
-    access_token : string
-    token_type : string
-}
-
-const API_BASE_URL = 'http://127.0.0.1:8000'
-
-export async function login(data : LoginRequest): 
-    Promise<LoginResponse> {
-        const response = await fetch(`${API_BASE_URL}/auth/login`,{
-            method : 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        if(!response.ok){
-            throw new Error('Invalid email or password')
-        }
-        return response.json()
-    }
-
-export async function getCurrentUser(): Promise<User> {
-  const token = getAccessToken()
-
-  if (!token) {
-    throw new Error('Access token not found')
-  }
-
-  const response = await fetch(
-    `${API_BASE_URL}/auth/me`,
-    {
-      method: 'GET',
-
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error('Unable to get current user')
-  }
-
-  return response.json()
-}
+export const login = (data: LoginRequest) =>
+  request<LoginResponse>('/auth/login', { method: 'POST', body: JSON.stringify(data) })
+export const register = (data: LoginRequest & { username: string }) =>
+  request<User>('/auth/register', { method: 'POST', body: JSON.stringify(data) })
+export const getCurrentUser = (signal?: AbortSignal) => request<User>('/auth/me', { signal })

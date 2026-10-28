@@ -1,21 +1,18 @@
-import { Navigate, Outlet } from 'react-router'
-
+import { Navigate, Outlet, useLocation } from 'react-router'
 import { useAuth } from '../hooks/useAuth'
+import { Brand } from './Icon'
 
-
-function ProtectedRoute() {
+export default function ProtectedRoute() {
   const { isAuthenticated, loading } = useAuth()
-
-  if (loading) {
-    return <p>Checking authentication...</p>
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
-
+  const location = useLocation()
+  if (loading)
+    return (
+      <div className="app-loading">
+        <Brand />
+        <span className="loading-line" />
+        <p>Opening your workspace…</p>
+      </div>
+    )
+  if (!isAuthenticated) return <Navigate to="/login" state={{ from: location.pathname }} replace />
   return <Outlet />
 }
-
-
-export default ProtectedRoute
